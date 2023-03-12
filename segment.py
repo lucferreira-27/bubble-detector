@@ -9,6 +9,7 @@ import requests
 def download_models(model_path='data/comictextdetector.pt'):
     if os.path.exists(model_path):
         print('ComicTextDetector model already exists.')
+        return
 
     model_dir = os.path.dirname(model_path)
     if not os.path.exists(model_dir):
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
     # Define input and output directories
     img_dir = 'images'
-    save_dir = 'model/annotations'
+    save_dir = 'outputs/speech-bubbles/'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
