@@ -35,3 +35,6 @@ BubbleCapture was created as a project to assist in the analysis process of mang
 - **NumPy**
 - **Google Cloud Vision API**
 
+## Acknowledgements
+
+- https://github.com/dmMaze/comic-text-detector
