@@ -36,6 +36,7 @@ response = requests.post(url, params=params, json=payload)
 
 # Parse the response to extract the OCR text
 data = json.loads(response.text)
+    
 texts = data['responses'][0]['textAnnotations']
 
 # Save the OCR text and vertices to a JSON file
