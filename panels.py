@@ -399,14 +399,14 @@ def order_panels(image, edges, thick_edges, label_rgb_image, labels, panels):
     
 
 
-process_image('E:/Projects/bubble-capture/bubble-detector/images/One Piece v1-118.jpg')
+#process_image('E:/Projects/bubble-capture/bubble-detector/images/One Piece v1-118.jpg')
 
-"""
+
 image_dir = './images'
 for filename in os.listdir(image_dir):
     if not filename.endswith('.png') and not filename.endswith('.jpg'):
         continue
     image_path = os.path.join(image_dir, filename)
     process_image(image_path)
-"""
+
 

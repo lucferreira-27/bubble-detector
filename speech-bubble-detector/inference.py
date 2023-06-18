@@ -23,9 +23,11 @@ def model2annotations(model_path, img_dir_list, save_dir, save_json=False):
     device = 'cuda' if cuda else 'cpu'
     model = TextDetector(model_path=model_path, input_size=1024, device=device, act='leaky')  
     imglist = []
+    print(model_path, img_dir_list, save_dir)
     for img_dir in img_dir_list:
         imglist += find_all_imgs(img_dir, abs_path=True)
     for img_path in tqdm(imglist):
+        print(img_path)
         imgname = osp.basename(img_path)
         img = imread(img_path)
         im_h, im_w = img.shape[:2]
