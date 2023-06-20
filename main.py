@@ -4,7 +4,7 @@ from cbz import unzip_cbz
 import os
 import shutil
 # Define the input and output directories
-input_dir = './images/volumes' # The directory where the cbz files are stored
+input_dir = './images/volumes/jp' # The directory where the cbz files are stored
 output_dir = './manga_pages' # The directory where the extracted manga pages will be saved
 annotation_dir = './output/annotations' # The directory where the speech bubble annotations will be saved
 panel_dir = './output/panels' # The directory where the panel images will be saved
