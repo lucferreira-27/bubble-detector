@@ -33,48 +33,12 @@ def create_folder_if_not_exists(folder_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-def run_model2annotations(img_dir, model_path, save_dir, save_json=False):
+def run_model2annotations(img_dir, save_dir, save_json=False):
     # Convert images to annotations using ComicTextDetector model
-    print('Running ComicTextDetector model...')
-    
-    temp_images = []
-
-# Create temporary images
-    for filename in os.listdir(img_dir):
-        if filename.endswith(".cbz"):
-            cbz_folder_name = os.path.join(save_dir, os.path.splitext(filename)[0])
-            create_folder_if_not_exists(cbz_folder_name)
-
-            with zipfile.ZipFile(os.path.join(img_dir, filename), 'r') as cbz_file:
-                for name in cbz_file.namelist():
-                    if name.lower().endswith(('.jpg', '.jpeg','.png')):
-                        temp_img_path = os.path.join(cbz_folder_name, f'temp_{name}')
-                        with open(temp_img_path, 'wb') as temp_img:
-                            temp_img.write(cbz_file.read(name))
-                        temp_images.append(temp_img_path)
-        else:
-            model2annotations(model_path, img_dir, save_dir, save_json=save_json)
-
-    # Process temporary images with model2annotations
-    for temp_img_path in temp_images:
-        cbz_folder_name = os.path.dirname(temp_img_path)
-        model2annotations(model_path, cbz_folder_name, cbz_folder_name, save_json=save_json)
-        os.remove(temp_img_path)
-
-    print('\nAnnotations saved to', save_dir)
-
-
-if __name__ == '__main__':
-    
+    os.makedirs(save_dir, exist_ok=True)
     model_path = 'model/comictextdetector.pt'
-    
-    download_models(model_path)
-
-    # Define input and output directories
-    img_dir = 'images'
-    save_dir = 'outputs/speech-bubbles/'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    # Run model2annotations
-    run_model2annotations(img_dir, model_path, save_dir, save_json=True)
+    if not os.path.exists(model_path):
+        download_models(model_path)
+    print('Running ComicTextDetector model...')
+    model2annotations(model_path, img_dir, save_dir, save_json=save_json)
+    print('\nAnnotations saved to', save_dir)

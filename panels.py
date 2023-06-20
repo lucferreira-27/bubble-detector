@@ -23,15 +23,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(console)
 
 
-def process_image(image_path):
+def process_image(image_path, output_dir = './outputs/panels/'):
     """Processes an image by detecting and labeling panels."""
     logging.info(f"Processing image: {image_path}")
 
     # Create directories for output files
-    output_dir = './outputs/panels/'
-    image_dir = os.path.join(output_dir, os.path.basename(image_path))
-    process_dir = os.path.join(image_dir, 'process')
-    os.makedirs(process_dir, exist_ok=True)
+    # image_dir = os.path.join(output_dir, os.path.basename(image_path))
+    # process_dir = os.path.join(image_dir, 'process')
+    os.makedirs(output_dir, exist_ok=True)
 
     # Load image and convert to grayscale
     im = load_image(image_path)
@@ -42,30 +41,34 @@ def process_image(image_path):
     thick_edges = thicken_edges(edges)
 
     # Fill holes in the image and label each patch
-    colors = get_colors(num_colors=9)
+    colors = get_colors(num_colors=99)
     labels = fill_holes(thick_edges)
+    print(len(labels))
     label_rgb_image = label_patches(im, labels, colors)
 
     # Draw custom shapes and labels for each patch
     labeled_image = draw_patches(im, label_rgb_image, labels, colors)
 
     # Save labeled image with text
-    labeled_image.save(os.path.join(process_dir, 'labeled_with_text.jpg'))
+    # labeled_image.save(os.path.join(process_dir, 'labeled_with_text.jpg'))
 
-     # Extract and order panels
+    # Extract and order panels
     panels, vertices = extract_panels(labels, im)
 
     # Display ordered images in a grid
-    ordered_images = order_panels(im, edges, thick_edges, label_rgb_image, labels, panels)
-    
+    ordered_images = order_panels(
+        im, edges, thick_edges, label_rgb_image, labels, panels)
+
     # Create a list of dictionaries containing the panel bounding box and vertices
-    panels_with_vertices = [{"bbox": list(map(int, panel)), "vertices": vertex_set} for panel, vertex_set in zip(panels, vertices)]
+    panels_with_vertices = [{"bbox": list(map(
+        int, panel)), "vertices": vertex_set} for panel, vertex_set in zip(panels, vertices)]
 
     # Save the panel information as a JSON file
-    with open(f'{process_dir}/panels.json', 'w') as f:
+    print(f'{output_dir}/panels-{os.path.basename(image_path)}.json')
+    with open(f'{output_dir}/panels-{os.path.basename(image_path)}.json', 'w') as f:
         json.dump(panels_with_vertices, f)
 
-    save_images(ordered_images, process_dir)
+    # save_images(ordered_images, process_dir)
     logging.info(f"Processing of {image_path} finished.")
 
 
@@ -79,6 +82,7 @@ def save_images(list_images, output_dir):
 
 def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=False, num_cols=2, figsize=(200, 100), title_fontsize=30):
     logging.info("Processing image: Displaying image grid")
+
     def img_is_color(img):
         if len(img.shape) == 3:
             # Check the color channels to see if they're all the same.
@@ -105,7 +109,7 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=False, 
     num_images = len(list_images)
     num_cols = min(num_images, num_cols)
     num_rows = int(num_images / num_cols) + \
-                   (1 if num_images % num_cols != 0 else 0)
+        (1 if num_images % num_cols != 0 else 0)
 
     # Create a grid of subplots.
     fig, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
@@ -138,7 +142,7 @@ def show_image_grid(list_images, num_cols=3, figsize=(20, 20)):
     num_images = len(list_images)
     num_cols = min(num_images, num_cols)
     num_rows = int(num_images / num_cols) + \
-                   (1 if num_images % num_cols != 0 else 0)
+        (1 if num_images % num_cols != 0 else 0)
 
     fig, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
     for i in range(num_rows):
@@ -200,7 +204,7 @@ def fill_holes(thick_edges):
     return label(filled_edges)
 
 
-def get_colors(num_colors=9):
+def get_colors(num_colors=99):
     logging.info("Processing image: Getting colors")
     color_map = plt.get_cmap("Set1", num_colors)
     colors = [color_map(i)[:3] for i in range(num_colors)]
@@ -270,6 +274,9 @@ def draw_patches(im, image, labels, colors):
         # Define custom shape vertices using the outer contour
         shape_vertices = [(col, row) for row, col in outer_contour.astype(int)]
 
+        print(len(colors), label_number)
+    
+        
         # Draw custom shape
         draw.polygon(shape_vertices, outline=tuple(round(x * 255)
                      for x in colors[label_number - 1]), width=10)
@@ -283,7 +290,8 @@ def extract_panels(labels, image):
     logging.info("Extracting panels AI")
     panels = []
     regions = regionprops(labels)
-    def create_masks(regions,image):
+
+    def create_masks(regions, image):
         masks = []
         for idx, region in enumerate(regions):
             mask = np.zeros_like(labels, dtype=bool)
@@ -299,7 +307,7 @@ def extract_panels(labels, image):
             masked_image = np.zeros_like(image)
             masked_image[mask] = image[mask]
         return masks
-    
+
     def get_shape_vertices(masks):
         shape_vertices_list = []
         for mask in masks:
@@ -313,7 +321,8 @@ def extract_panels(labels, image):
             contour_array = np.array([[int(x), int(y)] for y, x in contour])
 
             # Simplify the contour using skimage.measure.approximate_polygon
-            simplified_contour = approximate_polygon(contour_array, tolerance=2.5)
+            simplified_contour = approximate_polygon(
+                contour_array, tolerance=2.5)
 
             # Convert simplified contour coordinates to vertices
             vertices = [(int(x), int(y)) for x, y in simplified_contour]
@@ -321,35 +330,37 @@ def extract_panels(labels, image):
             shape_vertices_list.append(vertices)
 
         return shape_vertices_list
-    
+
     def is_panel_inside(bbox1, bbox2, threshold=0.7):
         y1_min, x1_min, y1_max, x1_max = bbox1
         y2_min, x2_min, y2_max, x2_max = bbox2
 
-        inter_area = max(0, min(y1_max, y2_max) - max(y1_min, y2_min)) * max(0, min(x1_max, x2_max) - max(x1_min, x2_min))
+        inter_area = max(0, min(y1_max, y2_max) - max(y1_min, y2_min)) * \
+            max(0, min(x1_max, x2_max) - max(x1_min, x2_min))
         area1 = (y1_max - y1_min) * (x1_max - x1_min)
         area2 = (y2_max - y2_min) * (x2_max - x2_min)
 
         ratio1 = inter_area / area1
         ratio2 = inter_area / area2
         return ratio1 >= threshold or ratio2 >= threshold
-    
-    masks = create_masks(regions,image)
+
+    masks = create_masks(regions, image)
     bboxs = []
-    for mask in masks: 
+    for mask in masks:
         mask_indices = np.argwhere(mask)
         x1, y1 = np.min(mask_indices, axis=0)
         x2, y2 = np.max(mask_indices, axis=0)
-        bboxs.append([x1,y1,x2,y2])
-    
+        bboxs.append([x1, y1, x2, y2])
+
     vertices = get_shape_vertices(masks)
     panel_regions = []
     print(vertices)
     for region in regions:
         area = region.area
         coords = region.coords
-        bbox = (np.min(coords[:, 0]), np.min(coords[:, 1]), np.max(coords[:, 0]), np.max(coords[:, 1]))
-        #bbox = region.bbox
+        bbox = (np.min(coords[:, 0]), np.min(coords[:, 1]),
+                np.max(coords[:, 0]), np.max(coords[:, 1]))
+        # bbox = region.bbox
         # Check if the current panel is inside another panel
         merge_with = -1
         for i, other_bbox in enumerate(panels):
@@ -385,28 +396,25 @@ def order_panels(image, edges, thick_edges, label_rgb_image, labels, panels):
     for i, bbox in enumerate(panels, start=1):
         panel_img[bbox[0]:bbox[2], bbox[1]:bbox[3]] = i
 
-    panel_img = Image.fromarray((label2rgb(panel_img, bg_label=0) * 255).astype('uint8'))
+    panel_img = Image.fromarray(
+        (label2rgb(panel_img, bg_label=0) * 255).astype('uint8'))
 
     # Create list of images to show
     list_images = [np.array(image), np.array(edges), np.array(thick_edges), np.array(label_rgb_image),
                    np.array(panel_img)]
     panel_images = []
- 
 
     list_images.extend(panel_images)
-    #show_image_list(list_images, figsize=(10, 10))
+    # show_image_list(list_images, figsize=(10, 10))
     return list_images
-    
 
 
-#process_image('E:/Projects/bubble-capture/bubble-detector/images/One Piece v1-118.jpg')
+# process_image('E:/Projects/bubble-capture/bubble-detector/images/One Piece v1-118.jpg')
 
 
-image_dir = './images'
-for filename in os.listdir(image_dir):
-    if not filename.endswith('.png') and not filename.endswith('.jpg'):
-        continue
-    image_path = os.path.join(image_dir, filename)
-    process_image(image_path)
-
-
+def get_panels_labels(image_dir,panel_dir):
+    for filename in os.listdir(image_dir):
+        if not filename.endswith('.png') and not filename.endswith('.jpg'):
+            continue
+        image_path = os.path.join(image_dir, filename)
+        process_image(image_path,panel_dir)

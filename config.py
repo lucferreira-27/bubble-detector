@@ -31,5 +31,4 @@ def load_env():
 def modules():
     sys.path.insert(0, './speech-bubble-detector')
    # sys.path.insert(1, './speech-bubble-detector/utils')
-config = load_env()
 modules()

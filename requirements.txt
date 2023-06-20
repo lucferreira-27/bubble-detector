@@ -23,4 +23,3 @@ torchvision==0.14.1
 tqdm==4.65.0
 trdg==1.8.0
 wandb==0.13.10
-dotenv
