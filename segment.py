@@ -40,5 +40,5 @@ def run_model2annotations(img_dir, save_dir, save_json=False):
     if not os.path.exists(model_path):
         download_models(model_path)
     print('Running ComicTextDetector model...')
-    model2annotations(model_path, img_dir, os.path.join(save_dir,os.path.basename(img_dir)), save_json=save_json)
-    print('\nAnnotations saved to', os.path.join(save_dir,os.path.basename(img_dir)))
+    model2annotations(model_path, img_dir, save_dir, save_json=save_json)
+    print('\nAnnotations saved to', save_dir)
