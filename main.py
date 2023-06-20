@@ -25,7 +25,7 @@ for file in os.listdir(input_dir):
         # Run the model to find speech bubbles in the manga pages and save the annotations as json files
         run_model2annotations(output_subdir, annotation_dir, save_json=True)
         # Extract the panels from the manga pages and save them as images
-        get_panels_labels(output_subdir, f'{panel_dir}/{os.path.basename(file)}')
+        # get_panels_labels(output_subdir, f'{panel_dir}/{os.path.basename(file)}')
         # Delete the output subdirectory
         shutil.rmtree(output_dir)
 

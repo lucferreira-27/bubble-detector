@@ -224,7 +224,7 @@ def draw_patches(im, image, labels, colors):
     """Draws custom shapes and labels for each patch in an image."""
     logging.info("Processing image: Drawing patches")
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("arial.ttf", 160)
+    font = ImageFont.truetype("./fonts/arial.ttf", 160)
     regions = regionprops(labels)
     size_limit = 1000
     masks = []
