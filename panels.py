@@ -28,8 +28,9 @@ def process_image(image_path, output_dir = './outputs/panels/'):
     logging.info(f"Processing image: {image_path}")
 
     # Create directories for output files
-    # image_dir = os.path.join(output_dir, os.path.basename(image_path))
-    # process_dir = os.path.join(image_dir, 'process')
+    image_dir = os.path.join(output_dir, os.path.basename(image_path))
+    process_dir = os.path.join(image_dir, 'process')
+    os.makedirs(process_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
     # Load image and convert to grayscale
@@ -43,11 +44,10 @@ def process_image(image_path, output_dir = './outputs/panels/'):
     # Fill holes in the image and label each patch
     colors = get_colors(num_colors=99)
     labels = fill_holes(thick_edges)
-    print(len(labels))
-    label_rgb_image = label_patches(im, labels, colors)
+    # label_rgb_image = label_patches(im, labels, colors)
 
     # Draw custom shapes and labels for each patch
-    labeled_image = draw_patches(im, label_rgb_image, labels, colors)
+    # labeled_image = draw_patches(im, label_rgb_image, labels, colors)
 
     # Save labeled image with text
     # labeled_image.save(os.path.join(process_dir, 'labeled_with_text.jpg'))
@@ -56,15 +56,14 @@ def process_image(image_path, output_dir = './outputs/panels/'):
     panels, vertices = extract_panels(labels, im)
 
     # Display ordered images in a grid
-    ordered_images = order_panels(
-        im, edges, thick_edges, label_rgb_image, labels, panels)
+    #ordered_images = order_panels(
+    #    im, edges, thick_edges, label_rgb_image, labels, panels)
 
     # Create a list of dictionaries containing the panel bounding box and vertices
     panels_with_vertices = [{"bbox": list(map(
         int, panel)), "vertices": vertex_set} for panel, vertex_set in zip(panels, vertices)]
 
     # Save the panel information as a JSON file
-    print(f'{output_dir}/panels-{os.path.basename(image_path)}.json')
     with open(f'{output_dir}/panels-{os.path.basename(image_path)}.json', 'w') as f:
         json.dump(panels_with_vertices, f)
 
@@ -193,7 +192,10 @@ def fill_holes(thick_edges):
     logging.info("Processing image: Filling holes")
     labels = label(thick_edges)
     props = regionprops(labels)
-    max_size = max([prop.area for prop in props])
+    if len(props) is 0:
+        max_size = 1
+    else:
+        max_size = max([prop.area for prop in props])
     size_threshold = max_size * 0.05
     filled_edges = np.zeros_like(thick_edges)
 
@@ -229,11 +231,12 @@ def draw_patches(im, image, labels, colors):
     size_limit = 1000
     masks = []
     label_number = 1
-
+    bboxs = []
     for idx, region in enumerate(regions):
         # Create an empty binary mask for the region with the same shape as the original image
         area = region.area
         bbox = region.bbox
+        bboxs.append(bbox)
         if area < size_limit:
             continue
         mask = np.zeros_like(labels, dtype=bool)
@@ -251,8 +254,8 @@ def draw_patches(im, image, labels, colors):
         masked_image[mask] = im[mask]
 
         # Draw label text for the patch
-        bbox = draw.textbbox((0, 0), str(label_number), font=font)
-        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        text_bbox = draw.textbbox((0, 0), str(label_number), font=font)
+        w, h = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
         mask_indices = np.argwhere(mask)
         min_row, min_col = np.min(mask_indices, axis=0)
         max_row, max_col = np.max(mask_indices, axis=0)
@@ -274,7 +277,6 @@ def draw_patches(im, image, labels, colors):
         # Define custom shape vertices using the outer contour
         shape_vertices = [(col, row) for row, col in outer_contour.astype(int)]
 
-        print(len(colors), label_number)
     
         
         # Draw custom shape
@@ -354,7 +356,6 @@ def extract_panels(labels, image):
 
     vertices = get_shape_vertices(masks)
     panel_regions = []
-    print(vertices)
     for region in regions:
         area = region.area
         coords = region.coords
@@ -381,7 +382,6 @@ def extract_panels(labels, image):
     # Remove small panels
     for i, bbox in reversed(list(enumerate(panels))):
         area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
-        print(area)
         if area < 0.01 * image.shape[0] * image.shape[1] or area < 110000.0:
             del panel_regions[i]
             del panels[i]
