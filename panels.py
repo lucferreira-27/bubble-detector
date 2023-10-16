@@ -23,6 +23,19 @@ logger = logging.getLogger(__name__)
 logger.addHandler(console)
 
 
+def save_intermediate_images(edges, thick_edges, labels, process_dir):
+
+    # Convert numpy arrays to PIL images
+    edges_image = Image.fromarray((edges * 255).astype(np.uint8))
+    thick_edges_image = Image.fromarray((thick_edges * 255).astype(np.uint8))
+    labels_image = Image.fromarray((labels * 255).astype(np.uint8))
+
+    # Save PIL images as files
+    edges_image.save(os.path.join(process_dir, 'edges.jpg'))
+    thick_edges_image.save(os.path.join(process_dir, 'thick_edges.jpg'))
+    labels_image.save(os.path.join(process_dir, 'labels.jpg'))
+
+
 def process_image(image_path, output_dir = './outputs/panels/'):
     """Processes an image by detecting and labeling panels."""
     logging.info(f"Processing image: {image_path}")
@@ -44,10 +57,12 @@ def process_image(image_path, output_dir = './outputs/panels/'):
     # Fill holes in the image and label each patch
     colors = get_colors(num_colors=99)
     labels = fill_holes(thick_edges)
-    # label_rgb_image = label_patches(im, labels, colors)
+    # Save the intermediate images
+    # save_intermediate_images(edges, thick_edges, labels, process_dir)
+    label_rgb_image = label_patches(im, labels, colors)
 
     # Draw custom shapes and labels for each patch
-    # labeled_image = draw_patches(im, label_rgb_image, labels, colors)
+    labeled_image = draw_patches(im, label_rgb_image, labels, colors)
 
     # Save labeled image with text
     # labeled_image.save(os.path.join(process_dir, 'labeled_with_text.jpg'))

@@ -4,7 +4,7 @@ from cbz import unzip_cbz
 import os
 import shutil
 # Define the input and output directories
-input_dir = './images/volumes/' # The directory where the cbz files are stored
+input_dir = './images/volumes/en' # The directory where the cbz files are stored
 output_dir = './manga_pages' # The directory where the extracted manga pages will be saved
 annotation_dir = './output/annotations' # The directory where the speech bubble annotations will be saved
 panel_dir = './output/panels' # The directory where the panel images will be saved
@@ -23,7 +23,7 @@ for file in os.listdir(input_dir):
         # Unzip the cbz file to the output subdirectory
         unzip_cbz(os.path.join(input_dir, file), output_subdir)
         # Run the model to find speech bubbles in the manga pages and save the annotations as json files
-        # run_model2annotations(output_subdir,f'{annotation_dir}/{os.path.basename(file)}' , save_json=True)
+        run_model2annotations(output_subdir,f'{annotation_dir}/{os.path.basename(file)}' , save_json=True)
         # Extract the panels from the manga pages and save them as images
         get_panels_labels(output_subdir, f'{panel_dir}/{os.path.basename(file)}')
         # Delete the output subdirectory
