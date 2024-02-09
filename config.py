@@ -30,5 +30,8 @@ def load_env():
     return config
 def modules():
     sys.path.insert(0, './speech-bubble-detector')
+    sys.path.insert(1, './transcription')
    # sys.path.insert(1, './speech-bubble-detector/utils')
 modules()
+config = load_env()
+

@@ -153,7 +153,7 @@ def refine_undetected_mask(img: np.ndarray, mask_pred: np.ndarray, mask_refined:
                 seg_blk_list.append(TextBlock(bbox))
     if len(seg_blk_list) > 0:
         mask_refined = cv2.bitwise_or(mask_refined, refine_mask(img, mask_pred, seg_blk_list, refine_mode=refine_mode))
-    return mask_refined
+    return mask_refined,seg_blk_list
 
 
 def refine_mask(img: np.ndarray, pred_mask: np.ndarray, blk_list: List[TextBlock], refine_mode: int = REFINEMASK_INPAINT) -> np.ndarray:

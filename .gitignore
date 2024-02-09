@@ -12,6 +12,7 @@ __pycache__/
 #folders
 output/*
 model/*
+manga_pages
 
 # C extensions
 *.so

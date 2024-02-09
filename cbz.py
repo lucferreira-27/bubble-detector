@@ -9,7 +9,6 @@ def save_panels(output="./output/panels"):
 
 def unzip_cbz(input, output):
     # Create a zipfile object from the input file
-    print(input)
     zf = zipfile.ZipFile(input, 'r')
     # Loop through the files in the zipfile
     for name in zf.namelist():
